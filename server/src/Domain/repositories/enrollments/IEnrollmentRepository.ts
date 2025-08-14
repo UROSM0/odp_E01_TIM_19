@@ -1,7 +1,7 @@
 import { Enrollment } from "../../models/Enrollment";
 
 export interface IEnrollmentRepository {
-  enroll(userId: number, courseId: number, role: 'student' | 'professor'): Promise<boolean>;
-  getUserEnrollments(userId: number): Promise<Enrollment[]>;
-  countUserEnrollments(userId: number): Promise<number>;
+  create(enrollment: Enrollment): Promise<Enrollment>;
+  getByUserId(userId: number): Promise<Enrollment[]>;
+  delete(userId: number, courseId: number): Promise<boolean>;
 }

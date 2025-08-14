@@ -4,7 +4,7 @@ export class Material {
     public courseId: number = 0,
     public authorId: number = 0,
     public title: string = '',
-    public description: string | null = null,
+    public description: string = '',
     public filePath: string = '',
     public fileMime:string='',
     public createdAt: Date = new Date()
