@@ -11,8 +11,8 @@ export class CourseController {
   }
 
   private initializeRoutes() {
-    this.router.get("/courses", authenticate, this.getAllCourses.bind(this));
-    this.router.get("/courses/:id", authenticate, this.getCourseById.bind(this));
+    this.router.get("/courses", this.getAllCourses.bind(this));
+    this.router.get("/courses/:id",this.getCourseById.bind(this));
   }
 
   private async getAllCourses(req: Request, res: Response) {

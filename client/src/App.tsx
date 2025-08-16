@@ -20,18 +20,18 @@ function App() {
       <Route path="/404" element={<NotFoundStranica />} />
 
         <Route
-          path="/user-dashboard"
+          path="/student-dashboard"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <KontrolnaTablaUserStranica />
             </ProtectedRoute>
           }
         />
 
         <Route
-          path="/admin-dashboard"
+          path="/profesor-dashboard"
           element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole="profesor">
               <KontrolnaTablaAdminStranica usersApi={usersApi} /> 
             </ProtectedRoute>
           }

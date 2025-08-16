@@ -11,7 +11,7 @@ export class EnrollmentController {
   }
 
   private initializeRoutes() {
-    this.router.post("/enrollments", authenticate, this.create.bind(this));
+    this.router.post("/enrollments",authenticate,this.create.bind(this)); //vratiti authenticate
     this.router.get("/enrollments/:userId", authenticate, this.getUserEnrollments.bind(this));
     this.router.delete("/enrollments", authenticate, this.delete.bind(this));
   }

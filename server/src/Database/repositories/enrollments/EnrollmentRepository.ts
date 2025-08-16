@@ -16,9 +16,9 @@ export class EnrollmentRepository implements IEnrollmentRepository {
       enrollment.role
     ]);
 
-    if (result.insertId) {
-      return new Enrollment(enrollment.userId, enrollment.courseId, enrollment.role);
-    }
+   if (result.affectedRows > 0) {
+  return enrollment;
+}
 
     return new Enrollment();
   }
