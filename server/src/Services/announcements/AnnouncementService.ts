@@ -8,12 +8,19 @@ export class AnnouncementService implements IAnnouncementService {
 
   async getByCourse(courseId: number): Promise<AnnouncementDto[]> {
     const announcements = await this.announcementRepository.getByCourse(courseId);
-    return announcements.map(a => new AnnouncementDto(a.id, a.courseId, a.authorId, a.text, a.imageUrl, a.createdAt));
+    return announcements.map(
+      a => new AnnouncementDto(a.id, a.courseId, a.authorId, a.text, a.imageUrl, a.createdAt)
+    );
   }
 
   async createAnnouncement(a: Announcement): Promise<AnnouncementDto> {
     const newA = await this.announcementRepository.create(a);
     return new AnnouncementDto(newA.id, newA.courseId, newA.authorId, newA.text, newA.imageUrl, newA.createdAt);
+  }
+
+  async updateAnnouncement(a: Announcement): Promise<AnnouncementDto> {
+    const updated = await this.announcementRepository.update(a);
+    return new AnnouncementDto(updated.id, updated.courseId, updated.authorId, updated.text, updated.imageUrl, updated.createdAt);
   }
 
   async deleteAnnouncement(id: number): Promise<boolean> {

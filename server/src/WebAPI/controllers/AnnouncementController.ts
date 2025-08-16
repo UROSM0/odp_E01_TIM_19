@@ -14,18 +14,42 @@ export class AnnouncementController {
 
   private initializeRoutes() {
     // Kreiranje obaveštenja - samo profesor može
-    this.router.post("/announcements", authenticate, authorize("professor"), this.createAnnouncement.bind(this));
+    this.router.post(
+      "/announcements",
+      authenticate,
+      authorize("professor"),
+      this.createAnnouncement.bind(this)
+    );
 
     // Dobavljanje obaveštenja po kursu - svi upisani korisnici mogu
     this.router.get("/announcements/:courseId", authenticate, this.getByCourse.bind(this));
 
+    // Ažuriranje obaveštenja - samo profesor
+    this.router.put(
+      "/announcements/:id",
+      authenticate,
+      authorize("professor"),
+      this.updateAnnouncement.bind(this)
+    );
+
     // Brisanje obaveštenja - samo profesor
-    this.router.delete("/announcements/:id", authenticate, authorize("professor"), this.deleteAnnouncement.bind(this));
+    this.router.delete(
+      "/announcements/:id",
+      authenticate,
+      authorize("professor"),
+      this.deleteAnnouncement.bind(this)
+    );
   }
 
   private async createAnnouncement(req: Request, res: Response) {
     try {
       const { courseId, authorId, text, imageUrl } = req.body;
+
+      // Validacija
+      if (!courseId || !authorId || !text || text.trim() === "") {
+        res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
+        return;
+      }
 
       const announcement = await this.announcementService.createAnnouncement(
         new Announcement(0, courseId, authorId, text, imageUrl)
@@ -36,6 +60,38 @@ export class AnnouncementController {
       res.status(500).json({ success: false, message: error });
     }
   }
+
+private async updateAnnouncement(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const { courseId, authorId, text, imageUrl } = req.body;
+
+    // Validacija
+    if (!text || text.trim() === "") {
+      res.status(400).json({ success: false, message: "Polje text je obavezno." });
+      return;
+    }
+
+    if (!courseId || !authorId) {
+      res.status(400).json({ success: false, message: "Polja courseId i authorId su obavezna." });
+      return;
+    }
+
+    // Kreiranje Announcement objekta
+    const announcementToUpdate = new Announcement(id, courseId, authorId, text, imageUrl);
+
+    const updated = await this.announcementService.updateAnnouncement(announcementToUpdate);
+
+    if (updated.id === 0) {
+      res.status(400).json({ success: false, message: "Ažuriranje nije uspelo." });
+    } else {
+      res.status(200).json(updated);
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: error });
+  }
+}
+
 
   private async getByCourse(req: Request, res: Response) {
     try {

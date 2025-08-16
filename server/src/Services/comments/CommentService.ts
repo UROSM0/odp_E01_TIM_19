@@ -1,81 +1,27 @@
-import { Router, Request, Response } from "express";
 import { ICommentService } from "../../Domain/services/comments/ICommentService";
+import { CommentRepository } from "../../Database/repositories/comments/CommentRepository";
+import { CommentDto } from "../../Domain/DTOs/comments/CommentDto";
 import { Comment } from "../../Domain/models/Comment";
-import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
-import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
 
-export class CommentController {
-  private router: Router;
+export class CommentService implements ICommentService {
+  constructor(private commentRepository: CommentRepository) {}
 
-  constructor(private commentService: ICommentService) {
-    this.router = Router();
-    this.initializeRoutes();
+  async getByAnnouncement(announcementId: number): Promise<CommentDto[]> {
+    const comments = await this.commentRepository.getByAnnouncement(announcementId);
+    return comments.map(c => new CommentDto(c.id, c.announcementId, c.authorId, c.text, c.createdAt));
   }
 
-  private initializeRoutes() {
-    // Kreiranje komentara
-    this.router.post("/comments", authenticate, authorize("student"), this.createComment.bind(this));
-
-    // Dobavljanje komentara po obaveštenju
-    this.router.get("/comments/:announcementId", authenticate, this.getByAnnouncement.bind(this));
-
-    // Brisanje komentara
-    this.router.delete("/comments/:id", authenticate, authorize("student"), this.deleteComment.bind(this));
-
-    // Izmena komentara
-    this.router.put("/comments/:id", authenticate, authorize("student"), this.updateComment.bind(this));
+  async createComment(c: Comment): Promise<CommentDto> {
+    const newC = await this.commentRepository.create(c);
+    return new CommentDto(newC.id, newC.announcementId, newC.authorId, newC.text, newC.createdAt);
   }
 
-  private async createComment(req: Request, res: Response) {
-    try {
-      const { announcementId, authorId, text } = req.body;
-
-      const comment = await this.commentService.createComment(
-        new Comment(0, announcementId, authorId, text)
-      );
-
-      res.status(201).json(comment);
-    } catch (error) {
-      res.status(500).json({ success: false, message: error });
-    }
+  async updateComment(c: Comment): Promise<CommentDto> {
+    const updatedC = await this.commentRepository.update(c);
+    return new CommentDto(updatedC.id, updatedC.announcementId, updatedC.authorId, updatedC.text, updatedC.createdAt);
   }
 
-  private async getByAnnouncement(req: Request, res: Response) {
-    try {
-      const announcementId = Number(req.params.announcementId);
-      const comments = await this.commentService.getByAnnouncement(announcementId);
-      res.status(200).json(comments);
-    } catch (error) {
-      res.status(500).json({ success: false, message: error });
-    }
-  }
-
-  private async deleteComment(req: Request, res: Response) {
-    try {
-      const id = Number(req.params.id);
-      const success = await this.commentService.deleteComment(id);
-      res.status(success ? 200 : 400).json({ success });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error });
-    }
-  }
-
-  private async updateComment(req: Request, res: Response) {
-    try {
-      const id = Number(req.params.id);
-      const { announcementId, authorId, text } = req.body;
-
-      const updated = await this.commentService.updateComment(
-        new Comment(id, announcementId, authorId, text)
-      );
-
-      res.status(200).json(updated);
-    } catch (error) {
-      res.status(500).json({ success: false, message: error });
-    }
-  }
-
-  public getRouter(): Router {
-    return this.router;
+  async deleteComment(id: number): Promise<boolean> {
+    return this.commentRepository.delete(id);
   }
 }

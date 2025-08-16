@@ -14,21 +14,44 @@ export class MaterialController {
 
   private initializeRoutes() {
     // Kreiranje materijala - samo profesor
-    this.router.post("/materials", authenticate, authorize("professor"), this.createMaterial.bind(this));
+    this.router.post(
+      "/materials",
+      authenticate,
+      authorize("professor"),
+      this.createMaterial.bind(this)
+    );
 
     // Dobavljanje materijala po kursu - svi upisani korisnici
-    this.router.get("/materials/:courseId", authenticate, this.getByCourse.bind(this));
+    this.router.get(
+      "/materials/:courseId",
+      authenticate,
+      this.getByCourse.bind(this)
+    );
 
     // Brisanje materijala - samo profesor
-    this.router.delete("/materials/:id", authenticate, authorize("professor"), this.deleteMaterial.bind(this));
+    this.router.delete(
+      "/materials/:id",
+      authenticate,
+      authorize("professor"),
+      this.deleteMaterial.bind(this)
+    );
   }
 
   private async createMaterial(req: Request, res: Response) {
     try {
-      const { courseId, authorId, title, description, filePath } = req.body;
+      const { courseId, authorId, title, description, filePath, fileMime } = req.body;
+
+      // Validacija
+      if (!courseId || !authorId || !title || title.trim() === "" || !filePath || filePath.trim() === "") {
+        res.status(400).json({
+          success: false,
+          message: "Polja courseId, authorId, title i filePath su obavezna.",
+        });
+        return;
+      }
 
       const material = await this.materialService.createMaterial(
-        new Material(0, courseId, authorId, title, description, filePath)
+        new Material(0, courseId, authorId, title, description || "", filePath, fileMime || "")
       );
 
       res.status(201).json(material);
