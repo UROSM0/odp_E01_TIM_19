@@ -36,4 +36,15 @@ export class EnrollmentRepository implements IEnrollmentRepository {
 
     return result.affectedRows > 0;
   }
+
+  async getUserEnrollmentsWithCourses(userId: number): Promise<any[]> {
+  const query = `
+    SELECT c.id AS courseId, c.name AS courseName, c.description, e.role
+    FROM enrollments e
+    JOIN courses c ON e.course_id = c.id
+    WHERE e.user_id = ?
+  `;
+  const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
+  return rows;
+}
 }

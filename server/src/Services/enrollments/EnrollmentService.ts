@@ -11,12 +11,12 @@ export class EnrollmentService implements IEnrollmentService {
     return new EnrollmentDto(enrollment.userId,enrollment.courseId, enrollment.role);
   }
 
-  async getUserEnrollments(userId: number): Promise<EnrollmentDto[]> {
-    const enrollments = await this.enrollmentRepository.getByUserId(userId);
-    return enrollments.map(e => new EnrollmentDto(e.userId,e.courseId, e.role));
-  }
-
   async delete(userId: number, courseId: number): Promise<boolean> {
     return this.enrollmentRepository.delete(userId, courseId);
   }
+
+  async getUserEnrollments(userId: number): Promise<any[]> {
+  // sada vraćamo podatke o kursevima, ne samo ID-ove
+  return this.enrollmentRepository.getUserEnrollmentsWithCourses(userId);
+}
 }

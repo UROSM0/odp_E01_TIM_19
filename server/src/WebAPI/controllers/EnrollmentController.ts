@@ -26,16 +26,6 @@ export class EnrollmentController {
     }
   }
 
-  private async getUserEnrollments(req: Request, res: Response) {
-    try {
-      const userId = Number(req.params.userId);
-      const enrollments = await this.enrollmentService.getUserEnrollments(userId);
-      res.status(200).json(enrollments);
-    } catch (error) {
-      res.status(500).json({ success: false, message: error });
-    }
-  }
-
   private async delete(req: Request, res: Response) {
     try {
       const { userId, courseId } = req.body;
@@ -49,4 +39,17 @@ export class EnrollmentController {
   public getRouter() {
     return this.router;
   }
+
+  private async getUserEnrollments(req: Request, res: Response) {
+  try {
+    const userId = Number(req.params.userId);
+    const enrollments = await this.enrollmentService.getUserEnrollments(userId);
+    res.status(200).json({
+      userId,
+      courses: enrollments
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error });
+  }
+}
 }

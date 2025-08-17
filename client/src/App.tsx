@@ -1,48 +1,34 @@
-import {
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { authApi } from "./api_services/auth/AuthAPIService";
 import { ProtectedRoute } from "./components/protected_route/ProtectedRoute";
 import PrijavaStranica from "./pages/auth/PrijavaStranica";
 import RegistracijaStranica from "./pages/auth/RegistracijaStranica";
-import KontrolnaTablaUserStranica from "./pages/kontrolna_tabla/KontrolnaTablaUserStranica";
-import KontrolnaTablaAdminStranica from "./pages/kontrolna_tabla/KontrolnaTablaAdminStranica";
+import DashboardStranica from "./pages/kontrolna_tabla/DashboardPage";
 import NotFoundStranica from "./pages/not_found/NotFoundPage";
-import { usersApi } from "./api_services/users/UsersAPIService";
+
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<PrijavaStranica authApi={authApi} />} />
-      <Route path="/register" element={<RegistracijaStranica authApi={authApi} />} />
-      <Route path="/404" element={<NotFoundStranica />} />
+<Routes>
+  <Route path="/login" element={<PrijavaStranica authApi={authApi} />} />
+  <Route path="/register" element={<RegistracijaStranica authApi={authApi} />} />
+  <Route path="/404" element={<NotFoundStranica />} />
 
-        <Route
-          path="/student-dashboard"
-          element={
-            <ProtectedRoute requiredRole="student">
-              <KontrolnaTablaUserStranica />
-            </ProtectedRoute>
-          }
-        />
+  {/* Dashboard za sve autentifikovane */}
+  <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute>
+        <DashboardStranica />
+      </ProtectedRoute>
+    }
+  />
 
-        <Route
-          path="/profesor-dashboard"
-          element={
-            <ProtectedRoute requiredRole="profesor">
-              <KontrolnaTablaAdminStranica usersApi={usersApi} /> 
-            </ProtectedRoute>
-          }
-        />
+  {/* Default root */}
+  <Route path="/" element={<Navigate to="/login" replace />} />
+  <Route path="*" element={<Navigate to="/404" replace />} />
+</Routes>
 
-        {/* Preusmerava na dashboard kao default rutu */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-
-        {/* Catch-all ruta za nepostojeće stranice */}
-        <Route path="*" element={<Navigate to="/404" replace />} />
-    </Routes>
   );
 }
 
