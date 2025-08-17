@@ -13,8 +13,9 @@ export default function RegistracijaStranica({ authApi }: RegistracijaPageProps)
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
+  
   useEffect(() => {
-    if (isAuthenticated && user) 
+    if (isAuthenticated && user && window.location.pathname !== "/register") 
       navigate(`/${user.uloga}-dashboard`);
   }, [isAuthenticated, navigate, user]);
 

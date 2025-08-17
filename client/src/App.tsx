@@ -6,29 +6,23 @@ import RegistracijaStranica from "./pages/auth/RegistracijaStranica";
 import DashboardStranica from "./pages/kontrolna_tabla/DashboardPage";
 import NotFoundStranica from "./pages/not_found/NotFoundPage";
 
-
 function App() {
   return (
-<Routes>
-  <Route path="/login" element={<PrijavaStranica authApi={authApi} />} />
-  <Route path="/register" element={<RegistracijaStranica authApi={authApi} />} />
-  <Route path="/404" element={<NotFoundStranica />} />
-
-  {/* Dashboard za sve autentifikovane */}
-  <Route
-    path="/dashboard"
-    element={
-      <ProtectedRoute>
-        <DashboardStranica />
-      </ProtectedRoute>
-    }
-  />
-
-  {/* Default root */}
-  <Route path="/" element={<Navigate to="/login" replace />} />
-  <Route path="*" element={<Navigate to="/404" replace />} />
-</Routes>
-
+    <Routes>
+      <Route path="/login" element={<PrijavaStranica authApi={authApi} />} />
+      <Route path="/register" element={<RegistracijaStranica authApi={authApi} />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardStranica />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/404" replace />} />
+      <Route path="/404" element={<NotFoundStranica />} />
+    </Routes>
   );
 }
 

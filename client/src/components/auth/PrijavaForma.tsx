@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { validacijaPodatakaAuth } from "../../api_services/validators/auth/AuthValidator";
 import type { AuthFormProps } from "../../types/props/auth_form_props/AuthFormProps";
 import { useAuth } from "../../hooks/auth/useAuthHook";
@@ -9,6 +9,7 @@ export function PrijavaForma({ authApi }: AuthFormProps) {
   const [lozinka, setLozinka] = useState("");
   const [greska, setGreska] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const podnesiFormu = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +22,8 @@ export function PrijavaForma({ authApi }: AuthFormProps) {
 
     const odgovor = await authApi.prijava(korisnickoIme, lozinka);
     if (odgovor.success && odgovor.data) {
-      login(odgovor.data);
+      login(odgovor.data);        // setuje user i token
+      navigate("/dashboard");     // preusmerava na dashboard
     } else {
       setGreska(odgovor.message);
       setKorisnickoIme("");

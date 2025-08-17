@@ -1,41 +1,36 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/auth/useAuthHook";
-import { coursesApi } from "../../api_services/courses/CoursesAPIService";
-import type { EnrollmentDto } from "../../models/enrollments/EnrollmentDto";
-import type { CourseDto } from "../../models/courses/CourseDto";
 import { Link } from "react-router-dom";
 
 export function Dashboard() {
   const { token, user } = useAuth();
-  const [enrollments, setEnrollments] = useState<EnrollmentDto[]>([]);
-  const [courses, setCourses] = useState<CourseDto[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!token || !user) return;
+    if (!token || !user) {
+      console.log("Nema tokena ili user-a:", { token, user }); // 👈 LOG 1
+      return;
+    }
 
-    const fetchData = async () => {
+    const fetchEnrollments = async () => {
       try {
-        const sviKursevi = await coursesApi.getAllCourses();
-        setCourses(sviKursevi);
-
+        console.log("Šaljemo request sa tokenom:", token); // 👈 LOG 2
         const res = await fetch(`${import.meta.env.VITE_API_URL}enrollments/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const userEnrollments: EnrollmentDto[] = await res.json();
-        setEnrollments(userEnrollments);
+        console.log("Status odgovora:", res.status); // 👈 LOG 3
+        const data = await res.json();
+        console.log("Podaci sa servera:", data); // 👈 LOG 4
+        setEnrollments(data.courses || []);
       } catch (error) {
-        console.error("Greška pri učitavanju dashboard-a:", error);
+        console.error("Greška pri učitavanju kurseva:", error);
       }
     };
 
-    fetchData();
+    fetchEnrollments();
   }, [token, user]);
 
-  const getCourseName = (courseId: number) => {
-    return courses.find(c => c.id === courseId)?.name || "Nepoznat kurs";
-  };
-
-  if (!user) return null; // ili neki loader
+  if (!user) return null;
 
   return (
     <div className="p-10 max-w-3xl mx-auto">
@@ -43,13 +38,10 @@ export function Dashboard() {
       
       <h2 className="text-2xl mb-4">Vaši kursevi:</h2>
       <ul className="list-disc list-inside space-y-2">
-        {enrollments.map(e => (
+        {enrollments.map((e: any) => (
           <li key={e.courseId}>
-            <Link
-              to={`/courses/${e.courseId}`}
-              className="text-blue-600 hover:underline"
-            >
-              {getCourseName(e.courseId)}
+            <Link to={`/courses/${e.courseId}`} className="text-blue-600 hover:underline">
+              {e.courseName}
             </Link> ({e.role})
           </li>
         ))}

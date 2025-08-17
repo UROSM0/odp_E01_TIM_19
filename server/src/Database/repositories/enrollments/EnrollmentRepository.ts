@@ -37,14 +37,27 @@ export class EnrollmentRepository implements IEnrollmentRepository {
     return result.affectedRows > 0;
   }
 
-  async getUserEnrollmentsWithCourses(userId: number): Promise<any[]> {
+ async getUserEnrollmentsWithCourses(userId: number): Promise<any[]> {
   const query = `
-    SELECT c.id AS courseId, c.name AS courseName, c.description, e.role
+    SELECT 
+      e.course_id AS courseId, 
+      c.name AS courseName, 
+      e.role
     FROM enrollments e
-    JOIN courses c ON e.course_id = c.id
+    LEFT JOIN courses c ON e.course_id = c.id
     WHERE e.user_id = ?
   `;
-  const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
-  return rows;
+  
+  try {
+    const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
+    return rows.map(row => ({
+      courseId: row.courseId,
+      courseName: row.courseName || "Nepoznat kurs", // fallback ako kurs ne postoji
+      role: row.role
+    }));
+  } catch (error) {
+    console.error("Greška u getUserEnrollmentsWithCourses:", error);
+    throw error; // propagiraj grešku ka service/controller
+  }
 }
 }

@@ -8,7 +8,7 @@ export class EnrollmentService implements IEnrollmentService {
 
   async create(userId: number, courseId: number, role: "student" | "professor"): Promise<EnrollmentDto> {
     const enrollment = await this.enrollmentRepository.create(new Enrollment(userId, courseId, role));
-    return new EnrollmentDto(enrollment.userId,enrollment.courseId, enrollment.role);
+    return new EnrollmentDto(enrollment.userId, enrollment.courseId, enrollment.role);
   }
 
   async delete(userId: number, courseId: number): Promise<boolean> {
@@ -16,7 +16,7 @@ export class EnrollmentService implements IEnrollmentService {
   }
 
   async getUserEnrollments(userId: number): Promise<any[]> {
-  // sada vraćamo podatke o kursevima, ne samo ID-ove
-  return this.enrollmentRepository.getUserEnrollmentsWithCourses(userId);
-}
+    // vraća courseId, courseName i role
+    return this.enrollmentRepository.getUserEnrollmentsWithCourses(userId);
+  }
 }

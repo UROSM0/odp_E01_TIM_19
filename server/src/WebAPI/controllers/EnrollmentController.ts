@@ -40,16 +40,21 @@ export class EnrollmentController {
     return this.router;
   }
 
-  private async getUserEnrollments(req: Request, res: Response) {
+ private async getUserEnrollments(req: Request, res: Response) {
   try {
     const userId = Number(req.params.userId);
+    console.log("📌 getUserEnrollments - userId:", userId);
+
     const enrollments = await this.enrollmentService.getUserEnrollments(userId);
+    console.log("📌 getUserEnrollments - enrollments:", enrollments);
+
     res.status(200).json({
       userId,
       courses: enrollments
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error });
+    console.error("❌ Greška u getUserEnrollments:", error);
+    res.status(500).json({ success: false, message: error instanceof Error ? error.message : error });
   }
 }
 }
