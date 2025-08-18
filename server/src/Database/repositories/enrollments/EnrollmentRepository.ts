@@ -6,22 +6,31 @@ import { RowDataPacket, ResultSetHeader } from "mysql2";
 export class EnrollmentRepository implements IEnrollmentRepository {
 
   async create(enrollment: Enrollment): Promise<Enrollment> {
-    const query = `
-      INSERT INTO enrollments (user_id, course_id, role)
-      VALUES (?, ?, ?)
-    `;
+  console.log("📌 Trying to create enrollment:", enrollment); // dodaj ovo
+  const query = `
+    INSERT INTO enrollments (user_id, course_id, role)
+    VALUES (?, ?, ?)
+  `;
+  try {
     const [result] = await db.execute<ResultSetHeader>(query, [
       enrollment.userId,
       enrollment.courseId,
       enrollment.role
     ]);
 
-   if (result.affectedRows > 0) {
-  return enrollment;
-}
+    console.log("📌 DB result:", result);
+
+    if (result.affectedRows > 0) {
+      return enrollment;
+    }
 
     return new Enrollment();
+  } catch (error) {
+    console.error("❌ Error in EnrollmentRepository.create:", error);
+    throw error;
   }
+}
+
 
   async getByUserId(userId: number): Promise<Enrollment[]> {
     const query = `SELECT * FROM enrollments WHERE user_id = ?`;

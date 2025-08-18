@@ -5,6 +5,7 @@ import PrijavaStranica from "./pages/auth/PrijavaStranica";
 import RegistracijaStranica from "./pages/auth/RegistracijaStranica";
 import DashboardStranica from "./pages/kontrolna_tabla/DashboardPage";
 import NotFoundStranica from "./pages/not_found/NotFoundPage";
+import CourseStranica from "./pages/kontrolna_tabla/CoursePage"; 
 
 function App() {
   return (
@@ -16,6 +17,14 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardStranica />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/courses/:id"
+        element={
+          <ProtectedRoute>
+            <CourseStranica />
           </ProtectedRoute>
         }
       />
