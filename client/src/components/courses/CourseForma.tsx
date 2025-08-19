@@ -50,6 +50,31 @@ export function CourseForma() {
     setAnnouncementModalOpen(false);
   };
 
+  const handleDeleteAnnouncement = async (id: number) => {
+    if (!token) return alert("Nema tokena");
+    if (!window.confirm("Da li si siguran da želiš da obrišeš ovu objavu?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/v1/announcements/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Greška:", errText);
+        return alert("Brisanje nije uspelo");
+      }
+
+      setAnnouncements(prev => prev.filter(a => a.id !== id));
+    } catch (err) {
+      console.error("Greška:", err);
+      alert("Greška pri komunikaciji sa serverom");
+    }
+  };
+
   return (
     <div className="p-10 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">{courseName}</h1>
@@ -90,7 +115,7 @@ export function CourseForma() {
                   <p>{a.text}</p>
                 </div>
 
-                {/* Dugmad za edit (ako je profesor) */}
+                {/* Dugmad za edit i delete (ako je profesor) */}
                 {user?.uloga === "professor" && (
                   <div className="flex flex-col gap-2">
                     <button
@@ -98,6 +123,12 @@ export function CourseForma() {
                       onClick={() => { setEditingAnnouncement(a); setAnnouncementModalOpen(true); }}
                     >
                       Izmeni
+                    </button>
+                    <button
+                      className="bg-red-600 text-white px-3 py-1 rounded"
+                      onClick={() => handleDeleteAnnouncement(a.id)}
+                    >
+                      Obriši
                     </button>
                   </div>
                 )}
