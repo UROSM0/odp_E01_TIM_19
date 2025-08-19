@@ -3,7 +3,6 @@ export interface AnnouncementDto {
   courseId: number;
   authorId: number;
   text: string;
-  imagePath?: string;
+  imageUrl?: string;
   createdAt: string;
-  updatedAt: string;
 }

@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL + "materials";
 export const materialsApi: IMaterialsAPIService = {
   async getMaterialsByCourse(courseId: number, token: string): Promise<MaterialDto[]> {
     try {
-      const res = await axios.get<MaterialDto[]>(`${API_URL}/course/${courseId}`, {
+      const res = await axios.get<MaterialDto[]>(`${API_URL}/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.data;

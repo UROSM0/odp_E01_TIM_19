@@ -24,6 +24,7 @@ import { MaterialRepository } from './Database/repositories/materials/MaterialRe
 import { IMaterialService } from './Domain/services/materials/IMaterialService';
 import { MaterialService } from './Services/materials/MaterialService';
 import { MaterialController } from './WebAPI/controllers/MaterialController';
+import path from "path";
 
 
 require('dotenv').config();
@@ -63,5 +64,6 @@ app.use('/api/v1', courseController.getRouter());
 app.use('/api/v1', enrollmentController.getRouter());
 app.use('/api/v1', announcementController.getRouter());
 app.use('/api/v1', materialController.getRouter());
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 export default app;

@@ -3,6 +3,25 @@ import { IAnnouncementService } from "../../Domain/services/announcements/IAnnou
 import { Announcement } from "../../Domain/models/Announcement";
 import { authenticate } from "../../Middlewares/authentification/AuthMiddleware";
 import { authorize } from "../../Middlewares/authorization/AuthorizeMiddleware";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Folder za slike
+const imagesFolder = path.join(__dirname, "../../public/images/announcements");
+if (!fs.existsSync(imagesFolder)) {
+  fs.mkdirSync(imagesFolder, { recursive: true });
+}
+
+// Konfiguracija Multer-a
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, imagesFolder),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
 
 export class AnnouncementController {
   private router: Router;
@@ -13,72 +32,82 @@ export class AnnouncementController {
   }
 
   private initializeRoutes() {
-    // Kreiranje obaveštenja - samo profesor može
+    // Upload slike
+    this.router.post("/announcements/upload", authenticate, authorize("professor"), upload.single("image"), this.uploadImage.bind(this));
+
+    // CRUD obaveštenja
     this.router.post(
-      "/announcements",
-      authenticate,
-      authorize("professor"),
-      this.createAnnouncement.bind(this)
-    );
-
-    // Dobavljanje obaveštenja po kursu - svi upisani korisnici mogu
+  "/announcements",
+  authenticate,
+  authorize("professor"),
+  upload.single("image"), // ← omogućava upload fajla
+  this.createAnnouncement.bind(this)
+);
     this.router.get("/announcements/:courseId", authenticate, this.getByCourse.bind(this));
-
-    // Ažuriranje obaveštenja - samo profesor
     this.router.put(
-      "/announcements/:id",
-      authenticate,
-      authorize("professor"),
-      this.updateAnnouncement.bind(this)
-    );
-
-    // Brisanje obaveštenja - samo profesor
-    this.router.delete(
-      "/announcements/:id",
-      authenticate,
-      authorize("professor"),
-      this.deleteAnnouncement.bind(this)
-    );
+  "/announcements/:id",
+  authenticate,
+  authorize("professor"),
+  upload.single("image"), // ← podržava upload nove slike
+  this.updateAnnouncement.bind(this)
+);
+    this.router.delete("/announcements/:id", authenticate, authorize("professor"), this.deleteAnnouncement.bind(this));
   }
 
-  private async createAnnouncement(req: Request, res: Response) {
+  private async uploadImage(req: Request, res: Response) {
     try {
-      const { courseId, authorId, text, imageUrl } = req.body;
-
-      // Validacija
-      if (!courseId || !authorId || !text || text.trim() === "") {
-        res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
-        return;
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "Nije poslata slika" });
       }
-
-      const announcement = await this.announcementService.createAnnouncement(
-        new Announcement(0, courseId, authorId, text, imageUrl)
-      );
-
-      res.status(201).json(announcement);
+      const relativePath = `images/announcements/${req.file.filename}`;
+      res.status(200).json({ success: true, path: relativePath });
     } catch (error) {
       res.status(500).json({ success: false, message: error });
     }
   }
 
-private async updateAnnouncement(req: Request, res: Response) {
+  private async createAnnouncement(req: Request, res: Response) {
+  try {
+    // Polja iz body-ja
+    const { courseId, authorId, text } = req.body;
+
+    if (!courseId || !authorId || !text || text.trim() === "") {
+      return res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
+    }
+
+    // Ako je fajl poslat, kreiramo imageUrl
+    const imageUrl = req.file ? `images/announcements/${req.file.filename}` : null;
+
+    const announcement = await this.announcementService.createAnnouncement(
+      new Announcement(0, Number(courseId), Number(authorId), text, imageUrl!)
+    );
+
+    res.status(201).json(announcement);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error });
+  }
+}
+
+  private async updateAnnouncement(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
     const { courseId, authorId, text, imageUrl } = req.body;
 
-    // Validacija
-    if (!text || text.trim() === "") {
-      res.status(400).json({ success: false, message: "Polje text je obavezno." });
-      return;
+    if (!courseId || !authorId || !text || text.trim() === "") {
+      return res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
     }
 
-    if (!courseId || !authorId) {
-      res.status(400).json({ success: false, message: "Polja courseId i authorId su obavezna." });
-      return;
-    }
+    // Ako je uploadovana nova slika, koristi njen path
+    const finalImageUrl = req.file ? `images/announcements/${req.file.filename}` : imageUrl || null;
 
-    // Kreiranje Announcement objekta
-    const announcementToUpdate = new Announcement(id, courseId, authorId, text, imageUrl);
+    const announcementToUpdate = new Announcement(
+      id,
+      Number(courseId),
+      Number(authorId),
+      text,
+      finalImageUrl
+    );
 
     const updated = await this.announcementService.updateAnnouncement(announcementToUpdate);
 
@@ -88,10 +117,10 @@ private async updateAnnouncement(req: Request, res: Response) {
       res.status(200).json(updated);
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error });
   }
 }
-
 
   private async getByCourse(req: Request, res: Response) {
     try {

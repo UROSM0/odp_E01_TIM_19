@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL + "announcements";
 export const announcementsApi: IAnnouncementsAPIService = {
   async getAnnouncementsByCourse(courseId: number, token: string): Promise<AnnouncementDto[]> {
     try {
-      const res = await axios.get<AnnouncementDto[]>(`${API_URL}/course/${courseId}`, {
+      const res = await axios.get<AnnouncementDto[]>(`${API_URL}/${courseId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       return res.data;
@@ -17,11 +17,11 @@ export const announcementsApi: IAnnouncementsAPIService = {
     }
   },
 
-  async createAnnouncement(courseId: number, text: string, imageUrl: string | null, token: string): Promise<AnnouncementDto> {
+  async createAnnouncement(courseId: number,authorId: number, text: string, imagePath: string | null, token: string|null): Promise<AnnouncementDto> {
     try {
       const res = await axios.post<AnnouncementDto>(
         API_URL,
-        { courseId, text, imageUrl },
+        { courseId,authorId, text, imagePath },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       return res.data;
@@ -31,7 +31,7 @@ export const announcementsApi: IAnnouncementsAPIService = {
     }
   },
 
-  async deleteAnnouncement(id: number, token: string): Promise<boolean> {
+  async deleteAnnouncement(id: number, token: string|null): Promise<boolean> {
     try {
       const res = await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -40,6 +40,27 @@ export const announcementsApi: IAnnouncementsAPIService = {
     } catch (error) {
       console.error("Greška pri brisanju obaveštenja:", error);
       return false;
+    }
+  },
+
+  async updateAnnouncement(
+    id: number,
+    courseId: number,
+    authorId: number,
+    text: string,
+    imagePath: string | null,
+    token: string|null
+  ): Promise<AnnouncementDto> {
+    try {
+      const res = await axios.put<AnnouncementDto>(
+        `${API_URL}/${id}`,
+        { courseId, authorId, text, imagePath },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    } catch (error: any) {
+      console.error("Greška pri ažuriranju obaveštenja:", error.response?.data || error.message);
+      throw error;
     }
   },
 };

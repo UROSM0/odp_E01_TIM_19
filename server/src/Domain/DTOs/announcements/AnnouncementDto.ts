@@ -4,7 +4,7 @@ export class AnnouncementDto {
     public courseId: number = 0,
     public authorId: number = 0,
     public text: string = "",
-    public imagePath?: string,
+    public imageUrl?: string,
     public createdAt?: Date
   ) {}
 }
