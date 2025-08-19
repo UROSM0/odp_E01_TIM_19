@@ -65,5 +65,6 @@ app.use('/api/v1', enrollmentController.getRouter());
 app.use('/api/v1', announcementController.getRouter());
 app.use('/api/v1', materialController.getRouter());
 app.use("/images", express.static(path.join(__dirname, "public/images")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 export default app;
