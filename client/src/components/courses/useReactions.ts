@@ -13,7 +13,7 @@ export function useReactions(announcementId: number, token: string | null) {
     }
     try {
       const res = await reactionsApi.getByAnnouncement(announcementId, token);
-      console.log("[useReactions] Reactions fetched", res);
+      
       setReactions(res);
     } catch (error) {
       console.error("[useReactions] Greška pri učitavanju reakcija:", error);
@@ -25,7 +25,7 @@ export function useReactions(announcementId: number, token: string | null) {
   }, [fetchReactions]);
 
   const toggleReaction = async (userId: number, type: "lajk" | "dislajk") => {
-    console.log("[useReactions] toggleReaction called", { userId, type, token });
+    
     if (!token || !userId) {
       console.warn("[useReactions] Token ili userId nedostupan, prekid toggle-a");
       return;

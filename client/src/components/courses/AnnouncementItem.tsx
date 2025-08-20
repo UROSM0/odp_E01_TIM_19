@@ -1,5 +1,6 @@
 import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
 import { useReactions } from "./useReactions";
+import { CommentsSection } from "./CommentsSection";
 
 interface Props {
   announcement: AnnouncementDto;
@@ -10,7 +11,7 @@ interface Props {
 }
 
 export function AnnouncementItem({ announcement, user, token, onEdit, onDelete }: Props) {
-  console.log("[AnnouncementItem] render", { user, token });
+  
 
   const { reactions, toggleReaction } = useReactions(announcement.id, token);
 
@@ -19,9 +20,11 @@ export function AnnouncementItem({ announcement, user, token, onEdit, onDelete }
   const dislikesCount = reactions.filter(r => r.lajkDislajk === "dislajk").length;
 
   const isStudent = user?.uloga === "student";
+  const isProfessor = user?.uloga === "professor";
 
   return (
     <li className="border p-4 rounded shadow-sm flex flex-col gap-2">
+      {/* Tekst + slika */}
       <div className="flex items-start gap-4">
         {announcement.imageUrl && (
           <img
@@ -32,7 +35,8 @@ export function AnnouncementItem({ announcement, user, token, onEdit, onDelete }
         )}
         <div className="flex-1">{announcement.text}</div>
 
-        {user?.uloga === "professor" && (
+        {/* Dugmici za profesora */}
+        {isProfessor && (
           <div className="flex flex-col gap-2 ml-4">
             <button
               className="bg-yellow-500 text-white px-3 py-1 rounded"
@@ -50,6 +54,7 @@ export function AnnouncementItem({ announcement, user, token, onEdit, onDelete }
         )}
       </div>
 
+      {/* Reakcije */}
       <div className="flex gap-2 mt-2">
         <button
           className={`px-2 py-1 rounded ${
@@ -77,6 +82,9 @@ export function AnnouncementItem({ announcement, user, token, onEdit, onDelete }
           👎 {dislikesCount}
         </button>
       </div>
+
+      {/* Sekcija za komentare */}
+      <CommentsSection announcementId={announcement.id} user={user} token={token} />
     </li>
   );
 }
