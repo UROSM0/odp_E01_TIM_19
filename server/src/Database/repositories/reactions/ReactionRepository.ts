@@ -11,6 +11,14 @@ export class ReactionRepository implements IReactionRepository {
     return rows.map(r => new Reaction(r.id, r.announcement_id, r.user_id, r.lajkDislajk));
   }
 
+  async findByUserAndAnnouncement(userId: number, announcementId: number): Promise<Reaction | null> {
+    const query = `SELECT * FROM reactions WHERE user_id = ? AND announcement_id = ? LIMIT 1`;
+    const [rows] = await db.execute<RowDataPacket[]>(query, [userId, announcementId]);
+    if (!rows.length) return null;
+    const r = rows[0];
+    return new Reaction(r.id, r.announcement_id, r.user_id, r.lajkDislajk);
+  }
+
   async create(reaction: Reaction): Promise<Reaction> {
     const query = `
       INSERT INTO reactions (announcement_id, user_id, lajkDislajk)
@@ -27,6 +35,12 @@ export class ReactionRepository implements IReactionRepository {
     }
 
     return new Reaction();
+  }
+
+  async update(reaction: Reaction): Promise<Reaction> {
+    const query = `UPDATE reactions SET lajkDislajk = ? WHERE id = ?`;
+    await db.execute<ResultSetHeader>(query, [reaction.lajkDislajk, reaction.id]);
+    return reaction;
   }
 
   async delete(id: number): Promise<boolean> {

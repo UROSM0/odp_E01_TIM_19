@@ -74,7 +74,7 @@ export class CommentController {
       const { announcementId, authorId, text } = req.body;
 
       // Validacija
-      if (!announcementId || !authorId || !text || text.trim() === "") {
+      if (!text || text.trim() === "") {
         res.status(400).json({
           success: false,
           message: "Polja announcementId, authorId i text su obavezna.",

@@ -1,0 +1,226 @@
+
+// CourseForma.tsx
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { coursesApi } from "../../api_services/courses/CoursesAPIService";
+import { announcementsApi } from "../../api_services/announcements/AnnouncementsAPIService";
+import { materialsApi } from "../../api_services/materials/MaterialsAPIService";
+import { useAuth } from "../../hooks/auth/useAuthHook";
+import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
+import type { MaterialDto } from "../../models/materials/MaterialDto";
+import { AnnouncementModal } from "../modals/AnnouncementModal";
+import { MaterialModal } from "../modals/MaterialModal";
+
+export function CourseForma() {
+  const { id } = useParams<{ id: string }>();
+  const courseId = Number(id);
+  const { token, user } = useAuth();
+
+  const [courseName, setCourseName] = useState<string>("");
+  const [announcements, setAnnouncements] = useState<AnnouncementDto[]>([]);
+  const [materials, setMaterials] = useState<MaterialDto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Modal state
+  const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<AnnouncementDto | null>(null);
+
+  const [materialModalOpen, setMaterialModalOpen] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState<MaterialDto | null>(null);
+
+  // Fetch podataka
+  useEffect(() => {
+    if (!courseId || !token) return;
+
+    const fetchData = async () => {
+      try {
+        const course = await coursesApi.getCourseById(courseId);
+        setCourseName(course?.name || "Nepoznat kurs");
+
+        const fetchedAnnouncements = await announcementsApi.getAnnouncementsByCourse(courseId, token);
+        setAnnouncements(fetchedAnnouncements);
+
+        const fetchedMaterials = await materialsApi.getMaterialsByCourse(courseId, token);
+        setMaterials(fetchedMaterials);
+      } catch (error) {
+        console.error("Greška pri učitavanju kursa:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [courseId, token]);
+
+  if (loading) return <div>Učitavanje kursa...</div>;
+
+  // Funkcija za čuvanje obaveštenja
+  const handleSaveAnnouncement = async (a: AnnouncementDto) => {
+  if (!token || !user) return;
+
+  try {
+    let saved: AnnouncementDto;
+    const payloadText = a.text?.trim() || "";
+    const payloadImage = a.imageUrl?.trim() || null;
+
+    if (!payloadText) {
+      alert("Tekst obaveštenja ne može biti prazan!");
+      return;
+    }
+
+    if (a.id && a.id !== 0) {
+      // Izmena postojeće objave
+      saved = await announcementsApi.updateAnnouncement(
+        a.id,
+        courseId,
+        a.authorId || user.id, // koristi authorId iz DTO ili user.id
+        payloadText,
+        payloadImage,
+        token
+      );
+      setAnnouncements(prev => prev.map(x => x.id === saved.id ? saved : x));
+    } else {
+      // Nova objava
+      saved = await announcementsApi.createAnnouncement(
+        courseId,
+        a.authorId || user.id,
+        payloadText,
+        payloadImage,
+        token
+      );
+      setAnnouncements(prev => [saved, ...prev]);
+    }
+
+    setEditingAnnouncement(null);
+    setAnnouncementModalOpen(false);
+  } catch (err) {
+    console.error("Greška pri čuvanju obaveštenja:", err);
+  }
+};
+
+  return (
+    <div className="p-10 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">{courseName}</h1>
+
+      {/* OBAVEŠTENJA */}
+      <section className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold">Objave</h2>
+          {user?.uloga === "professor" && (
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+              onClick={() => { setEditingAnnouncement(null); setAnnouncementModalOpen(true); }}
+            >
+              + Dodaj objavu
+            </button>
+          )}
+        </div>
+
+        {announcements.length === 0 ? (
+          <p>Nema objava za ovaj kurs.</p>
+        ) : (
+          <ul className="space-y-2">
+            {announcements.map(a => (
+              <li key={a.id} className="border p-4 rounded shadow-sm">
+                <p>{a.text}</p>
+
+                {user?.uloga === "professor" && (
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      className="bg-yellow-500 text-white px-3 py-1 rounded"
+                      onClick={() => { setEditingAnnouncement(a); setAnnouncementModalOpen(true); }}
+                    >
+                      Izmeni
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* MODAL */}
+      <AnnouncementModal
+        isOpen={announcementModalOpen}
+        onClose={() => setAnnouncementModalOpen(false)}
+        onSave={handleSaveAnnouncement}
+        initialData={editingAnnouncement || undefined}
+        courseId={courseId}
+      />
+    </div>
+  );
+} 
+
+
+
+
+
+
+
+
+// AnnouncementModal.tsx
+import { useState, useEffect } from "react";
+import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (a: AnnouncementDto) => void;
+  initialData?: AnnouncementDto;
+  courseId: number;
+}
+
+export function AnnouncementModal({ isOpen, onClose, onSave, initialData, courseId }: Props) {
+  const [text, setText] = useState("");
+  const [imagePath, setImagePath] = useState("");
+
+  useEffect(() => {
+    setText(initialData?.text || "");
+    setImagePath(initialData?.imageUrl || "");
+  }, [initialData]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+  if (!text.trim()) return alert("Tekst obaveštenja ne može biti prazan!");
+
+  onSave({
+    id: initialData?.id || 0,
+    courseId,
+    authorId: initialData?.authorId!, // undefined umesto 0
+    text: text.trim(),
+    imageUrl: imagePath.trim(),
+    createdAt: initialData?.createdAt || new Date().toISOString(),
+  });
+};
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
+        <h2 className="text-xl font-semibold mb-4">{initialData ? "Izmeni objavu" : "Nova objava"}</h2>
+        <textarea
+          className="border w-full p-2 mb-4 rounded"
+          rows={4}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="URL slike (opciono)"
+          className="border w-full p-2 mb-4 rounded"
+          value={imagePath}
+          onChange={(e) => setImagePath(e.target.value)}
+        />
+        <div className="flex justify-end gap-2">
+          <button className="px-4 py-2 rounded bg-gray-300" onClick={onClose}>Otkaži</button>
+          <button className="px-4 py-2 rounded bg-blue-600 text-white" onClick={handleSubmit}>Sačuvaj</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+

@@ -25,6 +25,20 @@ import { IMaterialService } from './Domain/services/materials/IMaterialService';
 import { MaterialService } from './Services/materials/MaterialService';
 import { MaterialController } from './WebAPI/controllers/MaterialController';
 import path from "path";
+import { ICourseRepository } from './Domain/repositories/courses/ICourseRepository';
+import { IEnrollmentRepository } from './Domain/repositories/enrollments/IEnrollmentRepository';
+import { IAnnouncementRepository } from './Domain/repositories/announcements/IAnnouncementRepository';
+import { IMaterialRepository } from './Domain/repositories/materials/IMaterialRepository';
+import { IReactionRepository } from './Domain/repositories/reactions/IReactionRepository';
+import { ReactionRepository } from './Database/repositories/reactions/ReactionRepository';
+import { IReactionService } from './Domain/services/reactions/IReactionService';
+import { ReactionService } from './Services/reactions/ReactionService';
+import { ReactionController } from './WebAPI/controllers/ReactionController';
+import { ICommentRepository } from './Domain/repositories/comments/ICommentRepository';
+import { CommentRepository } from './Database/repositories/comments/CommentRepository';
+import { ICommentService } from './Domain/services/comments/ICommentService';
+import { CommentService } from './Services/comments/CommentService';
+import { CommentController } from './WebAPI/controllers/CommentController';
 
 
 require('dotenv').config();
@@ -36,10 +50,12 @@ app.use(express.json());
 
 // Repositories
 const userRepository: IUserRepository = new UserRepository();
-const courseRepository = new CourseRepository();
-const enrollmentRepository = new EnrollmentRepository();
-const announcementRepository=new AnnouncementRepository();
-const materialRepository=new MaterialRepository();
+const courseRepository:ICourseRepository = new CourseRepository();
+const enrollmentRepository:IEnrollmentRepository = new EnrollmentRepository();
+const announcementRepository:IAnnouncementRepository=new AnnouncementRepository();
+const materialRepository:IMaterialRepository=new MaterialRepository();
+const reactionRepository:IReactionRepository=new ReactionRepository();
+const commentRepository:ICommentRepository=new CommentRepository();
 
 // Services
 const authService: IAuthService = new AuthService(userRepository);
@@ -48,6 +64,8 @@ const courseService: ICourseService = new CourseService(courseRepository);
 const enrollmentService:IEnrollmentService = new EnrollmentService(enrollmentRepository);
 const announcementService:IAnnouncementService=new AnnouncementService(announcementRepository);
 const materialService:IMaterialService=new MaterialService(materialRepository);
+const reactionService:IReactionService=new ReactionService(reactionRepository);
+const commentService:ICommentService=new CommentService(commentRepository);
 
 // WebAPI routes
 const authController = new AuthController(authService);
@@ -56,6 +74,8 @@ const courseController = new CourseController(courseService);
 const enrollmentController = new EnrollmentController(enrollmentService);
 const announcementController=new AnnouncementController(announcementService);
 const materialController=new MaterialController(materialService);
+const reactionController=new ReactionController(reactionService);
+const commentController=new CommentController(commentService);
 
 // Registering routes
 app.use('/api/v1', authController.getRouter());
@@ -66,5 +86,7 @@ app.use('/api/v1', announcementController.getRouter());
 app.use('/api/v1', materialController.getRouter());
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+app.use("/api/v1", reactionController.getRouter());
+app.use("/api/v1", commentController.getRouter());
 
 export default app;
