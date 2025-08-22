@@ -20,7 +20,7 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
     if (initialData) {
       setText(initialData.text || "");
       setPreviewUrl(initialData.imageUrl ? `http://localhost:4000/${initialData.imageUrl}` : "");
-      setImageFile(null); // reset samo input, ali čuvamo preview
+      setImageFile(null);
     } else {
       setText("");
       setPreviewUrl("");
@@ -45,27 +45,22 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
     formData.append("authorId", user.id.toString());
     formData.append("text", text.trim());
 
-    // SAMO ako je korisnik izabrao novu sliku
     if (imageFile) {
       formData.append("image", imageFile);
     }
 
     try {
-      let res: Response;
-
-      if (initialData?.id) {
-        res = await fetch(`http://localhost:4000/api/v1/announcements/${initialData.id}`, {
-          method: "PUT",
-          body: formData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      } else {
-        res = await fetch("http://localhost:4000/api/v1/announcements", {
-          method: "POST",
-          body: formData,
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
+      const res = initialData?.id
+        ? await fetch(`http://localhost:4000/api/v1/announcements/${initialData.id}`, {
+            method: "PUT",
+            body: formData,
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        : await fetch("http://localhost:4000/api/v1/announcements", {
+            method: "POST",
+            body: formData,
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -83,14 +78,18 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">
-          {initialData ? "Izmeni objavu" : "Nova objava"}
-        </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-lg p-6 rounded-3xl w-full max-w-md shadow-2xl relative">
+        <button
+          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-xl font-bold"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">{initialData ? "Izmeni objavu" : "Nova objava"}</h2>
 
         <textarea
-          className="border w-full p-2 mb-4 rounded"
+          className="border w-full p-2 mb-4 rounded focus:ring-2 focus:ring-yellow-300"
           rows={4}
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -112,12 +111,8 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
         )}
 
         <div className="flex justify-end gap-2">
-          <button className="px-4 py-2 rounded bg-gray-300" onClick={onClose}>
-            Otkaži
-          </button>
-          <button className="px-4 py-2 rounded bg-blue-600 text-white" onClick={handleSubmit}>
-            Sačuvaj
-          </button>
+          <button className="px-4 py-2 rounded bg-gray-300" onClick={onClose}>Otkaži</button>
+          <button className="px-4 py-2 rounded bg-blue-600 text-white" onClick={handleSubmit}>Sačuvaj</button>
         </div>
       </div>
     </div>

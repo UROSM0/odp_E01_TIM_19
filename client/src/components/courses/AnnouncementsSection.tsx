@@ -27,14 +27,26 @@ export function AnnouncementsSection({
   editingAnnouncement,
   setEditingAnnouncement
 }: Props) {
+
+  const openModalForNew = () => {
+    setEditingAnnouncement(null);
+    setModalOpen(true);
+    document.body.style.overflow = "hidden"; // blokira pozadinski scroll
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    document.body.style.overflow = ""; // vraća scroll
+  };
+
   return (
-    <section className="mb-8">
+    <section className="mb-8 relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Objave</h2>
         {user?.uloga === "professor" && (
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={() => { setEditingAnnouncement(null); setModalOpen(true); }}
+            onClick={openModalForNew}
           >
             + Dodaj objavu
           </button>
@@ -51,7 +63,7 @@ export function AnnouncementsSection({
               announcement={a}
               user={user}
               token={token}
-              onEdit={(a) => { setEditingAnnouncement(a); setModalOpen(true); }}
+              onEdit={(a) => { setEditingAnnouncement(a); setModalOpen(true); document.body.style.overflow = "hidden"; }}
               onDelete={onDelete}
             />
           ))}
@@ -60,7 +72,7 @@ export function AnnouncementsSection({
 
       <AnnouncementModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={onSave}
         initialData={editingAnnouncement || undefined}
         courseId={courseId}

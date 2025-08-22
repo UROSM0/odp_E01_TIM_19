@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { commentsApi } from "../../api_services/comments/CommentsAPIService";
 import { CommentItem } from "../courses/CommentItem";
 import type { CommentDto } from "../../models/comments/CommentsDto";
@@ -16,6 +16,12 @@ interface Props {
 export function CommentsModal({ isOpen, onClose, announcementId, user, token, comments, setComments }: Props) {
   const [newComment, setNewComment] = useState("");
 
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleAddComment = async () => {
@@ -29,32 +35,49 @@ export function CommentsModal({ isOpen, onClose, announcementId, user, token, co
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4">Svi komentari</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-lg p-6 rounded-3xl w-full max-w-md shadow-2xl relative max-h-[80vh] flex flex-col">
+        {/* Close button */}
+        <button
+          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-xl font-bold"
+          onClick={onClose}
+        >
+          ✕
+        </button>
 
-        <ul className="space-y-2 mb-4">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Svi komentari</h2>
+
+        {/* Scrollable comments */}
+        <div className="flex-1 overflow-y-auto space-y-2 mb-4">
           {comments.map(c => (
             <CommentItem key={c.id} comment={c} user={user} token={token} setComments={setComments} />
           ))}
-        </ul>
+        </div>
 
+        {/* Add new comment (if student) */}
         {user?.uloga === "student" && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-2">
             <input
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1 border px-2 py-1 rounded"
+              className="flex-1 border px-2 py-1 rounded focus:ring-2 focus:ring-yellow-300"
               placeholder="Dodaj komentar..."
             />
-            <button onClick={handleAddComment} className="bg-blue-600 text-white px-3 py-1 rounded">
+            <button
+              onClick={handleAddComment}
+              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+            >
               Dodaj
             </button>
           </div>
         )}
 
-        <button onClick={onClose} className="mt-4 bg-gray-500 text-white px-3 py-1 rounded">
+        {/* Close button at bottom */}
+        <button
+          onClick={onClose}
+          className="bg-gray-300 text-gray-800 px-4 py-2 rounded self-end hover:bg-gray-400 transition"
+        >
           Zatvori
         </button>
       </div>

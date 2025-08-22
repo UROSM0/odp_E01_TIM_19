@@ -7,8 +7,10 @@ interface RegistracijaPageProps {
 
 export default function RegistracijaStranica({ authApi }: RegistracijaPageProps) {
   return (
-    <main className="min-h-screen bg-gradient-to-tr from-slate-600/75 to-orange-800/70 flex items-center justify-center">
-      <RegistracijaForma authApi={authApi} />
+    <main className="min-h-screen bg-gradient-to-tr from-orange-100 via-orange-200 to-orange-300 flex items-center justify-center">
+      <div className="w-full max-w-md px-4">
+        <RegistracijaForma authApi={authApi} />
+      </div>
     </main>
   );
 }

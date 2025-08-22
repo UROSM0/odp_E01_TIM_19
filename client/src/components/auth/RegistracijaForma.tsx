@@ -13,11 +13,9 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
   const [lozinka, setLozinka] = useState("");
   const [uloga, setUloga] = useState("student");
   const [greska, setGreska] = useState("");
-
   const [kursevi, setKursevi] = useState<CourseDto[]>([]);
   const [izabraniKursevi, setIzabraniKursevi] = useState<number[]>([]);
 
-  // učitavanje kurseva sa servera
   useEffect(() => {
     (async () => {
       const data = await coursesApi.getAllCourses();
@@ -27,8 +25,6 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
 
   const podnesiFormu = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validacija korisničkih podataka
     const validacija = validacijaPodatakaAuth(korisnickoIme, lozinka);
     if (!validacija.uspesno) {
       setGreska(validacija.poruka ?? "Neispravni podaci");
@@ -41,11 +37,10 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
     }
 
     if (izabraniKursevi.length > 3) {
-      setGreska("Možete izabrati najvise 3 kursa.");
+      setGreska("Možete izabrati najviše 3 kursa.");
       return;
     }
 
-    // Registracija korisnika
     const odgovor = await authApi.registracija(korisnickoIme, lozinka, uloga);
     if (!odgovor.success) {
       setGreska(odgovor.message);
@@ -54,16 +49,13 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
 
     const newToken: string = odgovor.data!;
     try {
-      // Dekodiraj token da dobijemo ID korisnika
       const decoded = jwtDecode<JwtTokenClaims>(newToken);
       const userId = decoded.id;
 
-      // Upis u enrollments
       for (const courseId of izabraniKursevi) {
         await coursesApi.enrollUser(userId, courseId, uloga, newToken);
       }
 
-      // Nakon uspešne registracije i enroll-a, vodi korisnika na login
       navigate("/login");
     } catch (error) {
       console.error("Greška pri registraciji/enroll:", error);
@@ -72,70 +64,64 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
   };
 
   const toggleKurs = (id: number) => {
-    setIzabraniKursevi((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((x) => x !== id);
-      } else {
-        if (prev.length >= 3) return prev; // ograničenje na 3 kursa
-        return [...prev, id];
-      }
-    });
+    setIzabraniKursevi((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length >= 3 ? prev : [...prev, id]
+    );
   };
 
   return (
-    <div className="bg-white/30 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/20">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Registracija</h1>
-      <form onSubmit={podnesiFormu} className="space-y-4">
+    <div className="bg-white/40 backdrop-blur-lg shadow-lg rounded-3xl p-12 w-full max-w-md border border-white/30">
+      <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-8">Registracija</h1>
+      <form onSubmit={podnesiFormu} className="space-y-5">
         <input
           type="text"
           placeholder="Korisničko ime"
           value={korisnickoIme}
           onChange={(e) => setKorisnickoIme(e.target.value)}
-          className="w-full bg-white/40 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full bg-white px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition"
         />
         <input
           type="password"
           placeholder="Lozinka"
           value={lozinka}
           onChange={(e) => setLozinka(e.target.value)}
-          className="w-full bg-white/40 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full bg-white px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition"
         />
-        
         <select
           value={uloga}
           onChange={(e) => setUloga(e.target.value)}
-          className="w-full bg-white/40 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full bg-white px-5 py-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition"
         >
           <option value="student">Student</option>
           <option value="professor">Profesor</option>
         </select>
-        
-        {/* Lista kurseva sa checkbox-ovima */}
-        <div className="flex flex-col gap-2 max-h-40 overflow-y-auto border p-2 rounded">
+
+        <div className="flex flex-col gap-2 max-h-44 overflow-y-auto border border-gray-300 p-3 rounded-2xl bg-white/30 backdrop-blur-sm">
           {kursevi.map((kurs) => (
-            <label key={kurs.id} className="flex items-center gap-2">
+            <label key={kurs.id} className="flex items-center gap-2 text-gray-800">
               <input
                 type="checkbox"
                 checked={izabraniKursevi.includes(kurs.id)}
                 onChange={() => toggleKurs(kurs.id)}
+                className="accent-blue-500"
               />
               {kurs.name}
             </label>
           ))}
         </div>
 
-        {greska && <p className="text-md text-center text-red-700/80 font-medium">{greska}</p>}
+        {greska && <p className="text-center text-red-600 font-medium">{greska}</p>}
 
         <button
           type="submit"
-          className="w-full bg-blue-700/70 hover:bg-blue-700/90 text-white py-2 rounded-xl transition"
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-yellow-300 to-orange-400 text-gray-900 font-semibold text-lg hover:from-yellow-400 hover:to-orange-500 transition shadow-md"
         >
           Registruj se
         </button>
       </form>
-      <p className="text-center text-sm mt-4">
+      <p className="text-center text-sm text-gray-700 mt-6">
         Već imate nalog?{" "}
-        <Link to="/login" className="text-blue-700 hover:underline">
+        <Link to="/login" className="text-yellow-600 hover:text-yellow-500 font-medium">
           Prijavite se
         </Link>
       </p>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { MaterialDto } from "../../models/materials/MaterialDto";
 import { useAuth } from "../../hooks/auth/useAuthHook";
-//import { materialsApi } from "../../api_services/materials/MaterialsAPIService";
 import axios from "axios";
 
 interface Props {
@@ -41,77 +40,68 @@ export function MaterialModal({ isOpen, onClose, onSave, courseId, initialData }
     setPreviewFileName(f?.name || "");
   };
 
-const handleSubmit = async () => {
-  if (!title.trim()) return alert("Naziv materijala je obavezan!");
-  if (!token || !user) return alert("Nedostaje token ili korisnik nije ulogovan");
-  if (!file && !initialData) return alert("Morate izabrati fajl!");
+  const handleSubmit = async () => {
+    if (!title.trim()) return alert("Naziv materijala je obavezan!");
+    if (!token || !user) return alert("Nedostaje token ili korisnik nije ulogovan");
+    if (!file && !initialData) return alert("Morate izabrati fajl!");
 
-  try {
-    let fileData = { path: previewFileName, mimeType: "" };
+    try {
+      let fileData = { path: previewFileName, mimeType: "" };
 
-    // Upload fajla preko axios-a
-    if (file) {
-      const formData = new FormData();
-      formData.append("file", file);
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const uploadRes = await axios.post(
+          "http://localhost:4000/api/v1/materials/upload",
+          formData,
+          { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+        );
+        fileData = uploadRes.data;
+      }
 
-      const uploadRes = await axios.post(
-        "http://localhost:4000/api/v1/materials/upload",
-        formData,
+      const savedMaterial = await axios.post(
+        "http://localhost:4000/api/v1/materials",
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
+          courseId,
+          authorId: user.id,
+          title,
+          description,
+          filePath: fileData.path,
+          fileMime: fileData.mimeType,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Upload fajla response:", uploadRes.data);
-      fileData = uploadRes.data;
+      onSave(savedMaterial.data);
+      onClose();
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+      alert("Greška pri upload-u ili čuvanju materijala");
     }
-
-    // Kreiranje materijala
-    const savedMaterial = await axios.post(
-      "http://localhost:4000/api/v1/materials",
-      {
-        courseId,
-        authorId: user.id, // ID ulogovanog korisnika
-        title,
-        description,
-        filePath: fileData.path,
-        fileMime: fileData.mimeType,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    console.log("Kreirani materijal:", savedMaterial.data);
-    onSave(savedMaterial.data);
-    onClose();
-  } catch (err: any) {
-    console.error("Greška pri upload-u ili kreiranju materijala:", err.response?.data || err.message);
-    alert("Greška pri upload-u ili čuvanju materijala");
-  }
-};
-
-
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">{initialData ? "Izmeni materijal" : "Novi materijal"}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-hidden">
+      <div className="bg-white/90 backdrop-blur-lg p-6 rounded-3xl w-full max-w-md shadow-2xl relative">
+        <button
+          className="absolute top-4 right-4 text-gray-700 hover:text-gray-900 text-xl font-bold"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">{initialData ? "Izmeni materijal" : "Novi materijal"}</h2>
 
         <input
           type="text"
           placeholder="Naziv"
-          className="border w-full p-2 mb-2 rounded"
+          className="border w-full p-2 mb-2 rounded focus:ring-2 focus:ring-yellow-300"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
         <textarea
           placeholder="Opis (opciono)"
-          className="border w-full p-2 mb-2 rounded"
+          className="border w-full p-2 mb-2 rounded focus:ring-2 focus:ring-yellow-300"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -122,6 +112,7 @@ const handleSubmit = async () => {
           onChange={handleFileChange}
           className="border w-full p-2 mb-2 rounded"
         />
+
         {previewFileName && <p className="mb-2">Izabrani fajl: {previewFileName}</p>}
 
         <div className="flex justify-end gap-2">

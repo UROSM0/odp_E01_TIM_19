@@ -20,19 +20,31 @@ export function MaterialsSection({
   modalOpen,
   setModalOpen
 }: Props) {
+
+  const openModal = () => {
+    setModalOpen(true);
+    document.body.style.overflow = "hidden"; // blokira pozadinski scroll
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    document.body.style.overflow = ""; // vraća scroll
+  };
+
   return (
-    <section>
+    <section className="relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Materijali</h2>
         {user?.uloga === "professor" && (
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded"
-            onClick={() => setModalOpen(true)}
+            onClick={openModal}
           >
             + Dodaj materijal
           </button>
         )}
       </div>
+
       {materials.length === 0 ? <p>Nema materijala za ovaj kurs.</p> : (
         <ul className="space-y-4">
           {materials.map(m => (
@@ -63,7 +75,7 @@ export function MaterialsSection({
 
       <MaterialModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={closeModal}
         onSave={onSave}
         courseId={courseId}
       />
