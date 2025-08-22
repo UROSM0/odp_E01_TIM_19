@@ -1,9 +1,9 @@
-import { AnnouncementDto } from "../../DTOs/announcements/AnnouncementDto";
 import { Announcement } from "../../models/Announcement";
 
 export interface IAnnouncementService {
-  getByCourse(courseId: number): Promise<AnnouncementDto[]>;
-  createAnnouncement(a: Announcement): Promise<AnnouncementDto>;
-  updateAnnouncement(a: Announcement): Promise<AnnouncementDto>; 
+  createAnnouncement(announcement: Announcement): Promise<Announcement>;
+  getByCourse(courseId: number): Promise<Announcement[]>;
+  getById(id: number): Promise<Announcement | null>; // 👈 dodato
+  updateAnnouncement(announcement: Announcement): Promise<Announcement>;
   deleteAnnouncement(id: number): Promise<boolean>;
 }

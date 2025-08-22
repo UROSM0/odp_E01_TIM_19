@@ -17,9 +17,15 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
   const { token, user } = useAuth();
 
   useEffect(() => {
-    setText(initialData?.text || "");
-    setImageFile(null);
-    setPreviewUrl(initialData?.imageUrl || "");
+    if (initialData) {
+      setText(initialData.text || "");
+      setPreviewUrl(initialData.imageUrl ? `http://localhost:4000/${initialData.imageUrl}` : "");
+      setImageFile(null); // reset samo input, ali čuvamo preview
+    } else {
+      setText("");
+      setPreviewUrl("");
+      setImageFile(null);
+    }
   }, [initialData]);
 
   if (!isOpen) return null;
@@ -27,61 +33,61 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setImageFile(file);
-    setPreviewUrl(file ? URL.createObjectURL(file) : initialData?.imageUrl || "");
+    setPreviewUrl(file ? URL.createObjectURL(file) : previewUrl);
   };
 
   const handleSubmit = async () => {
-  if (!text.trim()) return alert("Tekst obaveštenja ne može biti prazan!");
-  if (!token || !user) return alert("Nedostaje token");
+    if (!text.trim()) return alert("Tekst obaveštenja ne može biti prazan!");
+    if (!token || !user) return alert("Nedostaje token");
 
-  const formData = new FormData();
-  formData.append("courseId", courseId.toString());
-  formData.append("authorId", user.id.toString());
-  formData.append("text", text.trim());
-  if (imageFile) formData.append("image", imageFile);
+    const formData = new FormData();
+    formData.append("courseId", courseId.toString());
+    formData.append("authorId", user.id.toString());
+    formData.append("text", text.trim());
 
-  try {
-    let res: Response;
-
-    if (initialData?.id) {
-      // UPDATE postojeće obaveštenje
-      res = await fetch(`http://localhost:4000/api/v1/announcements/${initialData.id}`, {
-        method: "PUT",
-        body: formData,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-    } else {
-      // NOVO obaveštenje
-      res = await fetch("http://localhost:4000/api/v1/announcements", {
-        method: "POST",
-        body: formData,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+    // SAMO ako je korisnik izabrao novu sliku
+    if (imageFile) {
+      formData.append("image", imageFile);
     }
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("GRESKA:", errorText);
-      return alert("Greška pri čuvanju obaveštenja");
-    }
+    try {
+      let res: Response;
 
-    const savedAnnouncement: AnnouncementDto = await res.json();
-    onSave(savedAnnouncement);
-    onClose();
-  } catch (err) {
-    console.error("Greška:", err);
-    alert("Greška pri komunikaciji sa serverom");
-  }
-};
+      if (initialData?.id) {
+        res = await fetch(`http://localhost:4000/api/v1/announcements/${initialData.id}`, {
+          method: "PUT",
+          body: formData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        res = await fetch("http://localhost:4000/api/v1/announcements", {
+          method: "POST",
+          body: formData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("GRESKA:", errorText);
+        return alert("Greška pri čuvanju obaveštenja");
+      }
+
+      const savedAnnouncement: AnnouncementDto = await res.json();
+      onSave(savedAnnouncement);
+      onClose();
+    } catch (err) {
+      console.error("Greška:", err);
+      alert("Greška pri komunikaciji sa serverom");
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded shadow-lg w-96">
-        <h2 className="text-xl font-semibold mb-4">{initialData ? "Izmeni objavu" : "Nova objava"}</h2>
+        <h2 className="text-xl font-semibold mb-4">
+          {initialData ? "Izmeni objavu" : "Nova objava"}
+        </h2>
 
         <textarea
           className="border w-full p-2 mb-4 rounded"
@@ -106,8 +112,12 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
         )}
 
         <div className="flex justify-end gap-2">
-          <button className="px-4 py-2 rounded bg-gray-300" onClick={onClose}>Otkaži</button>
-          <button className="px-4 py-2 rounded bg-blue-600 text-white" onClick={handleSubmit}>Sačuvaj</button>
+          <button className="px-4 py-2 rounded bg-gray-300" onClick={onClose}>
+            Otkaži
+          </button>
+          <button className="px-4 py-2 rounded bg-blue-600 text-white" onClick={handleSubmit}>
+            Sačuvaj
+          </button>
         </div>
       </div>
     </div>

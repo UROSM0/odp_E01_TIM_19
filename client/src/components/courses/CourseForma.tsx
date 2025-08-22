@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // 👈 dodali useNavigate
 import { coursesApi } from "../../api_services/courses/CoursesAPIService";
 import { announcementsApi } from "../../api_services/announcements/AnnouncementsAPIService";
 import { materialsApi } from "../../api_services/materials/MaterialsAPIService";
@@ -13,6 +13,7 @@ export function CourseForma() {
   const { id } = useParams<{ id: string }>();
   const courseId = Number(id);
   const { token, user } = useAuth();
+  const navigate = useNavigate(); // 👈 hook za navigaciju
 
   const [courseName, setCourseName] = useState("");
   const [announcements, setAnnouncements] = useState<AnnouncementDto[]>([]);
@@ -79,7 +80,15 @@ export function CourseForma() {
 
   return (
     <div className="p-10 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">{courseName}</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{courseName}</h1>
+        <button
+          onClick={() => navigate("/dashboard")} // 👈 vodi na Dashboard
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          ⬅ Nazad na Dashboard
+        </button>
+      </div>
 
       <AnnouncementsSection
         announcements={announcements}
@@ -96,7 +105,7 @@ export function CourseForma() {
 
       <MaterialsSection
         materials={materials}
-        user={user} 
+        user={user}
         courseId={courseId}
         onSave={handleSaveMaterial}
         onDelete={handleDeleteMaterial}

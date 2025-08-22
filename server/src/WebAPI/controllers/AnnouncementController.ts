@@ -92,14 +92,22 @@ export class AnnouncementController {
   private async updateAnnouncement(req: Request, res: Response) {
   try {
     const id = Number(req.params.id);
-    const { courseId, authorId, text, imageUrl } = req.body;
+    const { courseId, authorId, text } = req.body;
 
     if (!courseId || !authorId || !text || text.trim() === "") {
       return res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
     }
 
-    // Ako je uploadovana nova slika, koristi njen path
-    const finalImageUrl = req.file ? `images/announcements/${req.file.filename}` : imageUrl || null;
+    // Prvo uzmi postojeću objavu
+    const existing = await this.announcementService.getById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: "Obaveštenje nije pronađeno." });
+    }
+
+    // Ako je uploadovana nova slika, koristi nju, inače zadrži staru
+    const finalImageUrl = req.file
+      ? `images/announcements/${req.file.filename}`
+      : existing.imageUrl;
 
     const announcementToUpdate = new Announcement(
       id,

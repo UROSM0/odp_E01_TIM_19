@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { validacijaPodatakaAuth } from "../../api_services/validators/auth/AuthValidator";
 import type { AuthFormProps } from "../../types/props/auth_form_props/AuthFormProps";
-import { useAuth } from "../../hooks/auth/useAuthHook";
 import type { CourseDto } from "../../models/courses/CourseDto";
 import { coursesApi } from "../../api_services/courses/CoursesAPIService";
 import { jwtDecode } from "jwt-decode";
 import type { JwtTokenClaims } from "../../types/auth/JwtTokenClaims";
 
 export function RegistracijaForma({ authApi }: AuthFormProps) {
-  const {login} = useAuth();
+  const navigate = useNavigate();
   const [korisnickoIme, setKorisnickoIme] = useState("");
   const [lozinka, setLozinka] = useState("");
   const [uloga, setUloga] = useState("student");
@@ -18,13 +17,13 @@ export function RegistracijaForma({ authApi }: AuthFormProps) {
   const [kursevi, setKursevi] = useState<CourseDto[]>([]);
   const [izabraniKursevi, setIzabraniKursevi] = useState<number[]>([]);
 
-  // useEffect za učitavanje kurseva sa servera
-useEffect(() => {
-  (async () => {
-    const data = await coursesApi.getAllCourses(); // ukloni token
-    setKursevi(data);
-  })();
-}, []);
+  // učitavanje kurseva sa servera
+  useEffect(() => {
+    (async () => {
+      const data = await coursesApi.getAllCourses();
+      setKursevi(data);
+    })();
+  }, []);
 
   const podnesiFormu = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,29 +31,28 @@ useEffect(() => {
     // Validacija korisničkih podataka
     const validacija = validacijaPodatakaAuth(korisnickoIme, lozinka);
     if (!validacija.uspesno) {
-      setGreska(validacija.poruka ?? "Неисправни подаци");
+      setGreska(validacija.poruka ?? "Neispravni podaci");
       return;
     }
 
     if (izabraniKursevi.length === 0) {
-      setGreska("Морате изабрати најмање један курс.");
+      setGreska("Morate izabrati najmanje jedan kurs.");
       return;
     }
 
     if (izabraniKursevi.length > 3) {
-      setGreska("Можете изабрати највише 3 курса.");
+      setGreska("Možete izabrati najvise 3 kursa.");
       return;
     }
 
     // Registracija korisnika
     const odgovor = await authApi.registracija(korisnickoIme, lozinka, uloga);
-   if (!odgovor.success) {
-  setGreska(odgovor.message);
-  return;
-}
+    if (!odgovor.success) {
+      setGreska(odgovor.message);
+      return;
+    }
 
-const newToken: string = odgovor.data!;
-
+    const newToken: string = odgovor.data!;
     try {
       // Dekodiraj token da dobijemo ID korisnika
       const decoded = jwtDecode<JwtTokenClaims>(newToken);
@@ -65,8 +63,8 @@ const newToken: string = odgovor.data!;
         await coursesApi.enrollUser(userId, courseId, uloga, newToken);
       }
 
-      // Nakon što su upisi u enrollments uspešni
-      login(newToken);
+      // Nakon uspešne registracije i enroll-a, vodi korisnika na login
+      navigate("/login");
     } catch (error) {
       console.error("Greška pri registraciji/enroll:", error);
       setGreska("Došlo je do greške prilikom upisa u kurseve.");
@@ -86,18 +84,18 @@ const newToken: string = odgovor.data!;
 
   return (
     <div className="bg-white/30 backdrop-blur-lg shadow-xl rounded-2xl p-10 w-full max-w-md border border-white/20">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Регистрација</h1>
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Registracija</h1>
       <form onSubmit={podnesiFormu} className="space-y-4">
         <input
           type="text"
-          placeholder="Корисничко име"
+          placeholder="Korisničko ime"
           value={korisnickoIme}
           onChange={(e) => setKorisnickoIme(e.target.value)}
           className="w-full bg-white/40 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <input
           type="password"
-          placeholder="Лозинка"
+          placeholder="Lozinka"
           value={lozinka}
           onChange={(e) => setLozinka(e.target.value)}
           className="w-full bg-white/40 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -132,13 +130,13 @@ const newToken: string = odgovor.data!;
           type="submit"
           className="w-full bg-blue-700/70 hover:bg-blue-700/90 text-white py-2 rounded-xl transition"
         >
-          Региструј се
+          Registruj se
         </button>
       </form>
       <p className="text-center text-sm mt-4">
-        Већ имате налог?{" "}
+        Već imate nalog?{" "}
         <Link to="/login" className="text-blue-700 hover:underline">
-          Пријавите се
+          Prijavite se
         </Link>
       </p>
     </div>

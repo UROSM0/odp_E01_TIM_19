@@ -10,7 +10,13 @@ export class AnnouncementRepository implements IAnnouncementRepository {
       [announcement.courseId, announcement.authorId, announcement.text, announcement.imageUrl]
     );
     if (result.insertId) {
-      return new Announcement(result.insertId, announcement.courseId, announcement.authorId, announcement.text, announcement.imageUrl);
+      return new Announcement(
+        result.insertId,
+        announcement.courseId,
+        announcement.authorId,
+        announcement.text,
+        announcement.imageUrl
+      );
     }
     return new Announcement();
   }
@@ -20,7 +26,38 @@ export class AnnouncementRepository implements IAnnouncementRepository {
       "SELECT * FROM announcements WHERE course_id = ? ORDER BY created_at DESC",
       [courseId]
     );
-    return rows.map(row => new Announcement(row.id, row.course_id, row.author_id, row.text, row.image_url, row.created_at, row.updated_at));
+    return rows.map(
+      row =>
+        new Announcement(
+          row.id,
+          row.course_id,
+          row.author_id,
+          row.text,
+          row.image_url,
+          row.created_at,
+          row.updated_at
+        )
+    );
+  }
+
+  async getById(id: number): Promise<Announcement | null> {
+    const [rows] = await db.execute<RowDataPacket[]>(
+      "SELECT * FROM announcements WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) return null;
+
+    const row = rows[0];
+    return new Announcement(
+      row.id,
+      row.course_id,
+      row.author_id,
+      row.text,
+      row.image_url,
+      row.created_at,
+      row.updated_at
+    );
   }
 
   async update(announcement: Announcement): Promise<Announcement> {
