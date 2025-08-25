@@ -61,12 +61,12 @@ export class EnrollmentRepository implements IEnrollmentRepository {
     const [rows] = await db.execute<RowDataPacket[]>(query, [userId]);
     return rows.map(row => ({
       courseId: row.courseId,
-      courseName: row.courseName || "Nepoznat kurs", // fallback ako kurs ne postoji
+      courseName: row.courseName || "Nepoznat kurs", 
       role: row.role
     }));
   } catch (error) {
     console.error("Greška u getUserEnrollmentsWithCourses:", error);
-    throw error; // propagiraj grešku ka service/controller
+    throw error; 
   }
 }
 }

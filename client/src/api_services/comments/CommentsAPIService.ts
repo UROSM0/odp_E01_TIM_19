@@ -4,7 +4,7 @@ import type { CommentDto } from "../../models/comments/CommentsDto";
 const API_BASE = "http://localhost:4000/api/v1/comments";
 
 export const commentsApi = {
-  // Dohvatanje komentara za dati announcement
+  
   async getByAnnouncement(announcementId: number, token: string): Promise<CommentDto[]> {
     try {
       const res = await axios.get<CommentDto[]>(`${API_BASE}/${announcementId}`, {
@@ -17,7 +17,7 @@ export const commentsApi = {
     }
   },
 
-  // Kreiranje novog komentara
+  
   async createComment(comment: Omit<CommentDto, "id">, token: string): Promise<CommentDto | null> {
     try {
       const res = await axios.post<CommentDto>(API_BASE, comment, {
@@ -33,7 +33,7 @@ export const commentsApi = {
     }
   },
 
-  // Izmena postojećeg komentara
+  
   async updateComment(comment: CommentDto, token: string): Promise<CommentDto | null> {
     try {
       const res = await axios.put<CommentDto>(`${API_BASE}/${comment.id}`, comment, {
@@ -49,7 +49,7 @@ export const commentsApi = {
     }
   },
 
-  // Brisanje komentara
+  
   async deleteComment(id: number, token: string): Promise<boolean> {
     try {
       await axios.delete(`${API_BASE}/${id}`, {

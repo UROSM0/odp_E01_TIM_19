@@ -23,12 +23,12 @@ export function MaterialsSection({
 
   const openModal = () => {
     setModalOpen(true);
-    document.body.style.overflow = "hidden"; // blokira pozadinski scroll
+    document.body.style.overflow = "hidden"; 
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    document.body.style.overflow = ""; // vraća scroll
+    document.body.style.overflow = ""; 
   };
 
   return (

@@ -32,15 +32,15 @@ export class AnnouncementController {
   }
 
   private initializeRoutes() {
-    // Upload slike
+    
     this.router.post("/announcements/upload", authenticate, authorize("professor"), upload.single("image"), this.uploadImage.bind(this));
 
-    // CRUD obaveštenja
+    
     this.router.post(
   "/announcements",
   authenticate,
   authorize("professor"),
-  upload.single("image"), // ← omogućava upload fajla
+  upload.single("image"), 
   this.createAnnouncement.bind(this)
 );
     this.router.get("/announcements/:courseId", authenticate, this.getByCourse.bind(this));
@@ -48,7 +48,7 @@ export class AnnouncementController {
   "/announcements/:id",
   authenticate,
   authorize("professor"),
-  upload.single("image"), // ← podržava upload nove slike
+  upload.single("image"), 
   this.updateAnnouncement.bind(this)
 );
     this.router.delete("/announcements/:id", authenticate, authorize("professor"), this.deleteAnnouncement.bind(this));
@@ -68,14 +68,14 @@ export class AnnouncementController {
 
   private async createAnnouncement(req: Request, res: Response) {
   try {
-    // Polja iz body-ja
+    
     const { courseId, authorId, text } = req.body;
 
     if (!courseId || !authorId || !text || text.trim() === "") {
       return res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
     }
 
-    // Ako je fajl poslat, kreiramo imageUrl
+    
     const imageUrl = req.file ? `images/announcements/${req.file.filename}` : null;
 
     const announcement = await this.announcementService.createAnnouncement(
@@ -98,13 +98,13 @@ export class AnnouncementController {
       return res.status(400).json({ success: false, message: "Polja courseId, authorId i text su obavezna." });
     }
 
-    // Prvo uzmi postojeću objavu
+    
     const existing = await this.announcementService.getById(id);
     if (!existing) {
       return res.status(404).json({ success: false, message: "Obaveštenje nije pronađeno." });
     }
 
-    // Ako je uploadovana nova slika, koristi nju, inače zadrži staru
+    
     const finalImageUrl = req.file
       ? `images/announcements/${req.file.filename}`
       : existing.imageUrl;

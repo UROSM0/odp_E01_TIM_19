@@ -31,12 +31,12 @@ export function AnnouncementsSection({
   const openModalForNew = () => {
     setEditingAnnouncement(null);
     setModalOpen(true);
-    document.body.style.overflow = "hidden"; // blokira pozadinski scroll
+    document.body.style.overflow = "hidden"; 
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    document.body.style.overflow = ""; // vraća scroll
+    document.body.style.overflow = ""; 
   };
 
   return (

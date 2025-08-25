@@ -25,7 +25,7 @@ export function CourseForma() {
 
   const [materialModalOpen, setMaterialModalOpen] = useState(false);
 
-  // Blokada scrolla tela kada je modal otvoren
+  
   useEffect(() => {
     if (announcementModalOpen || materialModalOpen) {
       document.body.style.overflow = "hidden";

@@ -13,13 +13,13 @@ export class ReactionController {
   }
 
   private initializeRoutes() {
-    // Toggle kreiranje/brisanje reakcije - samo student
+    
     this.router.post("/reactions", authenticate, authorize("student"), this.toggleReaction.bind(this));
 
-    // Dobavljanje reakcija po obaveštenju - svi upisani korisnici
+    
     this.router.get("/reactions/:announcementId", authenticate, this.getByAnnouncement.bind(this));
 
-    // Brisanje reakcije - samo student koji je kreirao
+    
     this.router.delete("/reactions/:id", authenticate, authorize("student"), this.deleteReaction.bind(this));
   }
 
@@ -31,23 +31,23 @@ export class ReactionController {
         return res.status(400).json({ success: false, message: "Polja announcementId, userId i lajkDislajk su obavezna." });
       }
 
-      // Dohvati sve reakcije korisnika na ovo obaveštenje
+      
       const reactions = await this.reactionService.getByAnnouncement(announcementId);
       const existing = reactions.find(r => r.userId === userId);
 
       if (existing) {
         if (existing.lajkDislajk === lajkDislajk) {
-          // Ako je ista reakcija, obriši (toggle off)
+         
           await this.reactionService.deleteReaction(existing.id);
           return res.status(200).json({ success: true, action: "deleted" });
         } else {
-          // Ako je drugačija reakcija, update-uj na novi tip
-          await this.reactionService.deleteReaction(existing.id); // Brišemo staru
+          
+          await this.reactionService.deleteReaction(existing.id); 
           const newReaction = await this.reactionService.createReaction(new Reaction(0, announcementId, userId, lajkDislajk));
           return res.status(200).json({ success: true, action: "updated", reaction: newReaction });
         }
       } else {
-        // Nema prethodne reakcije → kreiraj novu
+        
         const newReaction = await this.reactionService.createReaction(new Reaction(0, announcementId, userId, lajkDislajk));
         return res.status(201).json({ success: true, action: "created", reaction: newReaction });
       }

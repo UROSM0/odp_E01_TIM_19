@@ -15,18 +15,18 @@ export class ReactionService implements IReactionService {
     const existing = await this.reactionRepository.findByUserAndAnnouncement(r.userId, r.announcementId);
 
     if (!existing) {
-      // Nema reakcije → kreiraj novu
+      
       const newR = await this.reactionRepository.create(r);
       return new ReactionDto(newR.id, newR.announcementId, newR.userId, newR.lajkDislajk);
     }
 
     if (existing.lajkDislajk === r.lajkDislajk) {
-      // Ista reakcija → obriši (toggle off)
+      
       await this.reactionRepository.delete(existing.id);
       return new ReactionDto(0, r.announcementId, r.userId, "" as any);
     }
 
-    // Različita reakcija → update
+    
     existing.lajkDislajk = r.lajkDislajk;
     const updated = await this.reactionRepository.update(existing);
     return new ReactionDto(updated.id, updated.announcementId, updated.userId, updated.lajkDislajk);

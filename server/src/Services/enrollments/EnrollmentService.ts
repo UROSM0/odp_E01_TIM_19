@@ -16,7 +16,7 @@ export class EnrollmentService implements IEnrollmentService {
   }
 
   async getUserEnrollments(userId: number): Promise<any[]> {
-    // vraća courseId, courseName i role
+   
     return this.enrollmentRepository.getUserEnrollmentsWithCourses(userId);
   }
 }
