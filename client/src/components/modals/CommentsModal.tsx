@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { commentsApi } from "../../api_services/comments/CommentsAPIService";
-import { CommentItem } from "../courses/CommentItem";
+import { CommentItem } from "../courses/comments/CommentItem";
 import type { CommentDto } from "../../models/comments/CommentsDto";
 
 interface Props {

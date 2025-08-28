@@ -13,7 +13,7 @@ export class CommentController {
   }
 
   private initializeRoutes() {
-    // Kreiranje komentara
+    
     this.router.post(
       "/comments",
       authenticate,
@@ -21,14 +21,14 @@ export class CommentController {
       this.createComment.bind(this)
     );
 
-    // Dobavljanje komentara po obaveštenju
+    
     this.router.get(
       "/comments/:announcementId",
       authenticate,
       this.getByAnnouncement.bind(this)
     );
 
-    // Brisanje komentara
+    
     this.router.delete(
       "/comments/:id",
       authenticate,
@@ -36,7 +36,7 @@ export class CommentController {
       this.deleteComment.bind(this)
     );
 
-    // Izmena komentara
+    
     this.router.put(
       "/comments/:id",
       authenticate,
@@ -49,7 +49,7 @@ export class CommentController {
     try {
       const { announcementId, authorId, text } = req.body;
 
-      // Validacija
+      
       if (!announcementId || !authorId || !text || text.trim() === "") {
         res.status(400).json({
           success: false,
@@ -73,7 +73,7 @@ export class CommentController {
       const id = Number(req.params.id);
       const { announcementId, authorId, text } = req.body;
 
-      // Validacija
+      
       if (!text || text.trim() === "") {
         res.status(400).json({
           success: false,

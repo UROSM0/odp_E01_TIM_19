@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { commentsApi } from "../../api_services/comments/CommentsAPIService";
-import type { CommentDto } from "../../models/comments/CommentsDto";
-import { CommentsModal } from "../modals/CommentsModal";
+import type { CommentDto } from "../../../models/comments/CommentsDto";
+import { commentsApi } from "../../../api_services/comments/CommentsAPIService";
+import { CommentsModal } from "../../modals/CommentsModal";
+
 
 interface Props {
   announcementId: number;

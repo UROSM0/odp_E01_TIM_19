@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { CommentDto } from "../../models/comments/CommentsDto";
 
-const API_BASE = "http://localhost:4000/api/v1/comments";
+const API_BASE = import.meta.env.VITE_API_URL + "comments";
 
 export const commentsApi = {
   

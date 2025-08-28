@@ -1,6 +1,8 @@
-import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
-import { useReactions } from "./useReactions";
-import { CommentsSection } from "./CommentsSection";
+import { useReactions } from "../../../hooks/reactions/useReactions";
+import type { AnnouncementDto } from "../../../models/announcements/AnnouncementDto";
+import { CommentsSection } from "../comments/CommentsSection";
+
+
 
 interface Props {
   announcement: AnnouncementDto;

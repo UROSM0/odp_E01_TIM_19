@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { commentsApi } from "../../api_services/comments/CommentsAPIService";
-import type { CommentDto } from "../../models/comments/CommentsDto";
+import type { CommentDto } from "../../../models/comments/CommentsDto";
+import { commentsApi } from "../../../api_services/comments/CommentsAPIService";
+
 
 interface Props {
   comment: CommentDto;

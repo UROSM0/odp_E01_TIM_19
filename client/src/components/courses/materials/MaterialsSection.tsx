@@ -1,5 +1,7 @@
-import type { MaterialDto } from "../../models/materials/MaterialDto";
-import { MaterialModal } from "../modals/MaterialModal";
+import type { MaterialDto } from "../../../models/materials/MaterialDto";
+import { MaterialModal } from "../../modals/MaterialModal";
+
+
 
 interface Props {
   materials: MaterialDto[];

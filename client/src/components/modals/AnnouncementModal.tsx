@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
 import { useAuth } from "../../hooks/auth/useAuthHook";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Props {
   isOpen: boolean;
@@ -51,12 +52,12 @@ export function AnnouncementModal({ isOpen, onClose, onSave, initialData, course
 
     try {
       const res = initialData?.id
-        ? await fetch(`http://localhost:4000/api/v1/announcements/${initialData.id}`, {
+        ? await fetch(`${API_URL}announcements/${initialData.id}`, {
             method: "PUT",
             body: formData,
             headers: { Authorization: `Bearer ${token}` },
           })
-        : await fetch("http://localhost:4000/api/v1/announcements", {
+        : await fetch(`${API_URL}announcements`, {
             method: "POST",
             body: formData,
             headers: { Authorization: `Bearer ${token}` },

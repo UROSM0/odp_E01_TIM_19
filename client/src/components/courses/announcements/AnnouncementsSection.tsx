@@ -1,5 +1,5 @@
-import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
-import { AnnouncementModal } from "../modals/AnnouncementModal";
+import type { AnnouncementDto } from "../../../models/announcements/AnnouncementDto";
+import { AnnouncementModal } from "../../modals/AnnouncementModal";
 import { AnnouncementItem } from "./AnnouncementItem";
 
 interface Props {

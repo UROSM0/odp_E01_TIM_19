@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { MaterialDto } from "../../models/materials/MaterialDto";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import axios from "axios";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface Props {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export function MaterialModal({ isOpen, onClose, onSave, courseId, initialData }
         const formData = new FormData();
         formData.append("file", file);
         const uploadRes = await axios.post(
-          "http://localhost:4000/api/v1/materials/upload",
+          `${API_URL}materials/upload`,
           formData,
           { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
         );
@@ -60,7 +61,7 @@ export function MaterialModal({ isOpen, onClose, onSave, courseId, initialData }
       }
 
       const savedMaterial = await axios.post(
-        "http://localhost:4000/api/v1/materials",
+        `${API_URL}materials`,
         {
           courseId,
           authorId: user.id,
