@@ -1,4 +1,5 @@
-import { Dashboard } from "../../components/courses/Dashboard";
+import { Dashboard } from "../../components/stranice/Dashboard";
+
 
 export default function DashboardStranica() {
   return (

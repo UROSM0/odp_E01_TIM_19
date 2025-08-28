@@ -1,4 +1,5 @@
-import { CourseForma } from "../../components/courses/CourseForma";
+import { CourseForma } from "../../components/stranice/CourseForma";
+
 
 export default function CourseStranica() {
   return (

@@ -6,8 +6,8 @@ import { materialsApi } from "../../api_services/materials/MaterialsAPIService";
 import { useAuth } from "../../hooks/auth/useAuthHook";
 import type { AnnouncementDto } from "../../models/announcements/AnnouncementDto";
 import type { MaterialDto } from "../../models/materials/MaterialDto";
-import { AnnouncementsSection } from "./announcements/AnnouncementsSection";
-import { MaterialsSection } from "./materials/MaterialsSection";
+import { AnnouncementsSection } from "../courses/announcements/AnnouncementsSection";
+import { MaterialsSection } from "../courses/materials/MaterialsSection";
 
 
 export function CourseForma() {
